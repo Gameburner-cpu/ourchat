@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mini WhatsApp</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- Status bar / app bar -->
+    <header class="app-header">
+      <div class="app-title">MiniChat</div>
+      <div class="app-actions">
+        <button class="icon-btn">🔍</button>
+        <button class="icon-btn">⋮</button>
+      </div>
+    </header>
+
+    <!-- Chat top bar: friend -->
+    <section class="chat-header">
+      <div class="chat-user-avatar">F</div>
+      <div class="chat-user-info">
+        <div class="chat-user-name">Friend</div>
+        <div class="chat-user-status">online</div>
+      </div>
+      <div class="chat-header-actions">
+        <button class="icon-btn" id="call-btn">📞</button>
+        <button class="icon-btn" id="video-btn">🎥</button>
+      </div>
+    </section>
+
+    <!-- Messages -->
+    <main class="chat-body">
+      <!-- sample messages -->
+      <div class="msg msg-left">
+        <div class="msg-bubble">
+          Hey, this is your friend.
+          <span class="msg-time">10:01</span>
+        </div>
+      </div>
+      <div class="msg msg-right">
+        <div class="msg-bubble">
+          Hi! This is you.
+          <span class="msg-time">10:02</span>
+        </div>
+      </div>
+    </main>
+
+    <!-- Input bar -->
+    <footer class="chat-input-bar">
+      <button class="icon-btn">😊</button>
+      <div class="input-wrapper">
+        <input
+          type="text"
+          class="chat-input"
+          placeholder="Type a message"
+        />
+      </div>
+      <button class="icon-btn">📎</button>
+      <button class="send-btn">➤</button>
+    </footer>
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
+
