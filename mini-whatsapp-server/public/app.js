@@ -3,15 +3,22 @@ const socket = io("https://ourchat-background.onrender.com", {
   transports: ["websocket", "polling"],
 });
 
-// Simple username selection (only "Mohith" or "Dimple" allowed on server)
+// STRICT username selection - NO lowercase conversion until validated
 let username = localStorage.getItem("miniwhatsapp-username");
 if (!username) {
-  username = prompt("Enter username (Mohith / Dimple)");
+  while (true) {
+    username = prompt("Enter EXACTLY: Mohith OR Dimple").trim();
+    if (username.toLowerCase() === "mohith" || username.toLowerCase() === "dimple") {
+      break;
+    }
+    alert("ONLY Mohith or Dimple allowed!");
+  }
   localStorage.setItem("miniwhatsapp-username", username);
 }
 
-// normalize to lowercase to match server-side usernames ("mohith", "dimple")
-username = (username || "").trim().toLowerCase();
+// NOW normalize to match server
+username = username.toLowerCase();
+console.log("FINAL username:", username);  // DEBUG: Check this in console!
 
 // Storage key for this device
 const STORAGE_KEY = "miniwhatsapp-messages";
@@ -55,8 +62,8 @@ function formatTime(ts) {
 }
 
 // Append a message bubble
-// msg: { from, text, ts }
 function appendMessage({ from, text, ts }, pushToArray = true) {
+  console.log("appendMessage:", { from, username, isMe: from === username }); // DEBUG
   const isMe = from === username;
 
   const wrapper = document.createElement("div");
@@ -88,6 +95,7 @@ socket.emit("join", username, (res) => {
     localStorage.removeItem("miniwhatsapp-username");
     location.reload();
   }
+  console.log("Joined as:", username); // DEBUG
 });
 
 // Send message to server
@@ -111,6 +119,7 @@ input.addEventListener("keydown", (e) => {
 
 // Receive messages from server
 socket.on("chat-message", (msg) => {
+  console.log("Received msg:", msg); // DEBUG: See from value
   appendMessage(msg, true);
 });
 
