@@ -3,24 +3,46 @@ const socket = io("https://ourchat-background.onrender.com", {
   transports: ["websocket", "polling"],
 });
 
-// Simple username selection (only "you" or "friend" allowed on server)
+// Simple username selection (only "Mohith" or "Dimple" allowed on server)
 let username = localStorage.getItem("miniwhatsapp-username");
 if (!username) {
-  username = prompt("Enter username (you / friend)");
+  username = prompt("Enter username (Mohith / Dimple)");
   localStorage.setItem("miniwhatsapp-username", username);
 }
 
-// Join the private room
-socket.emit("join", username, (res) => {
-  if (!res.ok) {
-    alert("Access denied: " + res.error);
-  }
-});
+// Storage key for this device
+const STORAGE_KEY = "miniwhatsapp-messages";
 
 // DOM references
 const chatBody = document.querySelector(".chat-body");
 const input = document.querySelector(".chat-input");
 const sendBtn = document.querySelector(".send-btn");
+
+// In-memory message list
+let messages = [];
+
+// Load messages from localStorage on startup
+function loadMessages() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return;
+    messages = parsed;
+    messages.forEach((msg) => appendMessage(msg, false));
+  } catch (e) {
+    console.error("Failed to load messages", e);
+  }
+}
+
+// Save messages to localStorage
+function saveMessages() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+  } catch (e) {
+    console.error("Failed to save messages", e);
+  }
+}
 
 function formatTime(ts) {
   return new Date(ts).toLocaleTimeString([], {
@@ -30,7 +52,7 @@ function formatTime(ts) {
 }
 
 // Append a message bubble
-function appendMessage({ from, text, ts }) {
+function appendMessage({ from, text, ts }, pushToArray = true) {
   const isMe = from === username;
 
   const wrapper = document.createElement("div");
@@ -47,7 +69,19 @@ function appendMessage({ from, text, ts }) {
   wrapper.appendChild(bubble);
   chatBody.appendChild(wrapper);
   chatBody.scrollTop = chatBody.scrollHeight;
+
+  if (pushToArray) {
+    messages.push({ from, text, ts });
+    saveMessages();
+  }
 }
+
+// Join the private room
+socket.emit("join", username, (res) => {
+  if (!res.ok) {
+    alert("Access denied: " + res.error);
+  }
+});
 
 // Send message to server
 function sendMessage() {
@@ -70,5 +104,17 @@ input.addEventListener("keydown", (e) => {
 
 // Receive messages from server
 socket.on("chat-message", (msg) => {
-  appendMessage(msg);
+  appendMessage(msg, true);
 });
+
+// Initial load of history
+loadMessages();
+
+// Register service worker for PWA install / offline shell
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register("/sw.js")
+      .catch((err) => console.error("SW registration failed", err));
+  });
+}

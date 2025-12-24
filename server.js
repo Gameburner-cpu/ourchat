@@ -10,7 +10,7 @@ const io = new Server(server, {
   },
 });
 
-const ALLOWED_USERS = ["you", "friend"];
+const ALLOWED_USERS = ["Mohith", "Dimple"];
 const ROOM_ID = "private-room";
 
 app.get("/", (req, res) => {
