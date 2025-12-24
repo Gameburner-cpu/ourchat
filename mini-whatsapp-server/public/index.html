@@ -10,18 +10,18 @@
   <div class="app">
     <!-- Status bar / app bar -->
     <header class="app-header">
-      <div class="app-title">MD Chat</div>
+      <div class="app-title">MiniChat</div>
       <div class="app-actions">
         <button class="icon-btn">🔍</button>
         <button class="icon-btn">⋮</button>
       </div>
     </header>
 
-    <!-- Chat top bar: friend -->
+    <!-- Chat top bar: user -->
     <section class="chat-header">
-      <div class="chat-user-avatar">F</div>
+      <div class="chat-user-avatar">D</div>
       <div class="chat-user-info">
-        <div class="chat-user-name">Friend</div>
+        <div class="chat-user-name">Dimple</div>
         <div class="chat-user-status">online</div>
       </div>
       <div class="chat-header-actions">
@@ -30,18 +30,9 @@
       </div>
     </section>
 
-    <!-- Messages -->
+    <!-- Messages (empty, filled by JS) -->
     <main class="chat-body">
-      <div class="msg msg-left">
-        <div class="msg-bubble">
-          <span class="msg-time">10:01</span>
-        </div>
-      </div>
-      <div class="msg msg-right">
-        <div class="msg-bubble">
-          <span class="msg-time">10:02</span>
-        </div>
-      </div>
+      <!-- Messages will be injected here by app.js -->
     </main>
 
     <!-- Input bar -->
@@ -59,7 +50,7 @@
     </footer>
   </div>
 
-  <!-- Socket.IO client from CDN (no integrity attribute) -->
+  <!-- Socket.IO client from CDN -->
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
   <script src="app.js"></script>
 </body>
