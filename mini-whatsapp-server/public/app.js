@@ -70,7 +70,7 @@ function formatTime(ts) {
 // msg: { from, text, ts }
 function appendMessage({ from, text, ts }, pushToArray = true) {
   const isMe = from === username;
-  console.log("appendMessage DEBUG => from:", from, "username:", username, "isMe:", isMe); // DEBUG
+  console.log("appendMessage DEBUG => from:", from, "username:", username, "isMe:", isMe);
 
   const wrapper = document.createElement("div");
   wrapper.className = "msg " + (isMe ? "msg-right" : "msg-left");
@@ -78,11 +78,7 @@ function appendMessage({ from, text, ts }, pushToArray = true) {
   const bubble = document.createElement("div");
   bubble.className = "msg-bubble";
 
-  // include debug info inside the bubble so you can see it on phone
   bubble.innerHTML = `
-    <div style="font-size:10px;color:#888;">
-      from: ${from} | username: ${username} | ${isMe ? "ME" : "OTHER"}
-    </div>
     ${text}
     <span class="msg-time">${formatTime(ts)}</span>
   `;
@@ -101,11 +97,10 @@ function appendMessage({ from, text, ts }, pushToArray = true) {
 socket.emit("join", username, (res) => {
   if (!res.ok) {
     alert("Access denied: " + res.error);
-    // clear invalid username and force re-prompt
     localStorage.removeItem("miniwhatsapp-username");
     location.reload();
   }
-  console.log("Joined as:", username); // DEBUG
+  console.log("Joined as:", username);
 });
 
 // Send message to server
@@ -129,7 +124,7 @@ input.addEventListener("keydown", (e) => {
 
 // Receive messages from server
 socket.on("chat-message", (msg) => {
-  console.log("Received msg:", msg); // DEBUG: See from value
+  console.log("Received msg:", msg);
   appendMessage(msg, true);
 });
 
