@@ -10,6 +10,9 @@ if (!username) {
   localStorage.setItem("miniwhatsapp-username", username);
 }
 
+// normalize to lowercase to match server-side usernames ("mohith", "dimple")
+username = (username || "").trim().toLowerCase();
+
 // Storage key for this device
 const STORAGE_KEY = "miniwhatsapp-messages";
 
@@ -52,6 +55,7 @@ function formatTime(ts) {
 }
 
 // Append a message bubble
+// msg: { from, text, ts }
 function appendMessage({ from, text, ts }, pushToArray = true) {
   const isMe = from === username;
 
@@ -80,6 +84,9 @@ function appendMessage({ from, text, ts }, pushToArray = true) {
 socket.emit("join", username, (res) => {
   if (!res.ok) {
     alert("Access denied: " + res.error);
+    // clear invalid username and force re-prompt
+    localStorage.removeItem("miniwhatsapp-username");
+    location.reload();
   }
 });
 
@@ -118,35 +125,3 @@ if ("serviceWorker" in navigator) {
       .catch((err) => console.error("SW registration failed", err));
   });
 }
-socket.emit("join", username, (res) => {
-  if (!res.ok) {
-    alert("Access denied: " + res.error);
-    localStorage.removeItem("miniwhatsapp-username");
-    location.reload();
-  }
-});
-  
-function renderTicks(status) {
-  if (status === "sent") return "✓";
-  if (status === "delivered") return "✓✓";
-  if (status === "read") return "✓✓";
-  return "";
-}
-bubble.innerHTML = `
-  ${text}
-  <span class="msg-time">
-    ${formatTime(ts)} <span class="ticks ticks-${status}">${renderTicks(status)}</span>
-  </span>
-`;
-socket.on("chat-message", (msg) => {
-  msg.status = msg.from === username ? "sent" : "delivered";
-  appendMessage(msg, true);
-});
-
-socket.on("message-delivered", ({ id }) => {
-  updateMessageStatus(id, "delivered");
-});
-
-socket.on("message-read", ({ id }) => {
-  updateMessageStatus(id, "read");
-});
