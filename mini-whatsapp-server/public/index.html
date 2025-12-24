@@ -32,7 +32,6 @@
 
     <!-- Messages -->
     <main class="chat-body">
-      <!-- sample messages -->
       <div class="msg msg-left">
         <div class="msg-bubble">
           Hey, this is your friend.
@@ -61,8 +60,11 @@
       <button class="send-btn">➤</button>
     </footer>
   </div>
-  <script src="/socket.io/socket.io.js"></script>
+
+  <!-- Socket.IO client from CDN -->
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"
+          integrity="sha384-yYgC9P0tq37QKqZPCGhjxx2Low6vpE0Oqna2bb11v+YIT579lkTFS3RPnH9A2M8c"
+          crossorigin="anonymous"></script>
   <script src="app.js"></script>
 </body>
 </html>
-

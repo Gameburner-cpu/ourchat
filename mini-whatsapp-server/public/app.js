@@ -1,5 +1,7 @@
-// Connect to Socket.IO on same origin
-const socket = io();
+// Connect to remote Socket.IO backend (Render)
+const socket = io("https://ourchat-background.onrender.com", {
+  transports: ["websocket", "polling"],
+});
 
 // Simple username selection (only "you" or "friend" allowed on server)
 let username = localStorage.getItem("miniwhatsapp-username");
@@ -23,7 +25,7 @@ const sendBtn = document.querySelector(".send-btn");
 function formatTime(ts) {
   return new Date(ts).toLocaleTimeString([], {
     hour: "2-digit",
-    minute: "2-digit"
+    minute: "2-digit",
   });
 }
 
@@ -52,7 +54,6 @@ function sendMessage() {
   const text = input.value.trim();
   if (!text) return;
 
-  // send to server; server will broadcast to room (including me)
   socket.emit("chat-message", text);
   input.value = "";
 }

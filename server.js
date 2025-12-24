@@ -5,14 +5,17 @@ const { Server } = require("socket.io");
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: { origin: "*" }
+  cors: {
+    origin: "*", // later: replace "*" with your Netlify URL
+  },
 });
-
-// adjust this line so it points to mini-whatsapp-server/public
-app.use(express.static("mini-whatsapp-server/public"));
 
 const ALLOWED_USERS = ["you", "friend"];
 const ROOM_ID = "private-room";
+
+app.get("/", (req, res) => {
+  res.send("Socket server running");
+});
 
 io.on("connection", (socket) => {
   console.log("connected", socket.id);
@@ -32,7 +35,7 @@ io.on("connection", (socket) => {
     const payload = {
       from: socket.data.username,
       text,
-      ts: Date.now()
+      ts: Date.now(),
     };
     io.to(ROOM_ID).emit("chat-message", payload);
   });
@@ -44,5 +47,5 @@ io.on("connection", (socket) => {
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log("Server running on http://localhost:" + PORT);
+  console.log("Server running on port " + PORT);
 });
