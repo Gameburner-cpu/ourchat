@@ -21,22 +21,22 @@ if (!username) {
   localStorage.setItem("miniwhatsapp-username", username);
 }
 
-// NOW normalize to match server ("mohith" / "dimple")
+// Normalize to match server
 username = username.toLowerCase();
-console.log("FINAL username:", username); // DEBUG
+console.log("FINAL username:", username);
 
-// Storage key for this device
+// Storage key
 const STORAGE_KEY = "miniwhatsapp-messages";
 
-// DOM references
+// DOM elements
 const chatBody = document.querySelector(".chat-body");
 const input = document.querySelector(".chat-input");
 const sendBtn = document.querySelector(".send-btn");
 
-// In-memory message list
+// Messages array
 let messages = [];
 
-// Load messages from localStorage on startup
+// Load saved messages
 function loadMessages() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -50,7 +50,7 @@ function loadMessages() {
   }
 }
 
-// Save messages to localStorage
+// Save messages
 function saveMessages() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
@@ -66,11 +66,10 @@ function formatTime(ts) {
   });
 }
 
-// Append a message bubble
-// msg: { from, text, ts }
+// Add message to chat
 function appendMessage({ from, text, ts }, pushToArray = true) {
   const isMe = from === username;
-  console.log("appendMessage DEBUG => from:", from, "username:", username, "isMe:", isMe);
+  console.log("appendMessage:", { from, username, isMe });
 
   const wrapper = document.createElement("div");
   wrapper.className = "msg " + (isMe ? "msg-right" : "msg-left");
@@ -93,7 +92,7 @@ function appendMessage({ from, text, ts }, pushToArray = true) {
   }
 }
 
-// Join the private room
+// Join room
 socket.emit("join", username, (res) => {
   if (!res.ok) {
     alert("Access denied: " + res.error);
@@ -103,18 +102,16 @@ socket.emit("join", username, (res) => {
   console.log("Joined as:", username);
 });
 
-// Send message to server
+// Send message
 function sendMessage() {
   const text = input.value.trim();
   if (!text) return;
-
   socket.emit("chat-message", text);
   input.value = "";
 }
 
-// UI events
+// Events
 sendBtn.addEventListener("click", sendMessage);
-
 input.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
     e.preventDefault();
@@ -122,16 +119,16 @@ input.addEventListener("keydown", (e) => {
   }
 });
 
-// Receive messages from server
+// Receive
 socket.on("chat-message", (msg) => {
   console.log("Received msg:", msg);
   appendMessage(msg, true);
 });
 
-// Initial load of history
+// Load history
 loadMessages();
 
-// Register service worker for PWA install / offline shell
+// Service worker
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker
