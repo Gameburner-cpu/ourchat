@@ -6,12 +6,11 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*", // later: restrict to your Netlify URL
+    origin: "*", 
     methods: ["GET", "POST"]
   }
 });
 
-// store allowed users in lowercase for easier comparison
 const ALLOWED_USERS = ["mohith", "dimple"];
 const ROOM_ID = "private-room";
 
@@ -31,7 +30,7 @@ io.on("connection", (socket) => {
       return;
     }
 
-    socket.data.username = clean; // store lowercase username
+    socket.data.username = clean;
     socket.join(ROOM_ID);
     cb && cb({ ok: true });
   });
@@ -40,7 +39,7 @@ io.on("connection", (socket) => {
     if (!socket.data.username) return;
 
     const payload = {
-      from: socket.data.username, // "mohith" or "dimple"
+      from: socket.data.username,
       text,
       ts: Date.now()
     };
