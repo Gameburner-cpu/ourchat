@@ -3,12 +3,17 @@ const socket = io("https://ourchat-background.onrender.com", {
   transports: ["websocket", "polling"],
 });
 
-// STRICT username selection
+// STRICT username selection - NO lowercase conversion until validated
 let username = localStorage.getItem("miniwhatsapp-username");
 if (!username) {
   while (true) {
-    username = prompt("Enter EXACTLY: Mohith OR Dimple").trim();
-    if (username.toLowerCase() === "mohith" || username.toLowerCase() === "dimple") {
+    username = prompt("Enter EXACTLY: Mohith OR Dimple");
+    if (!username) continue;
+    username = username.trim();
+    if (
+      username.toLowerCase() === "mohith" ||
+      username.toLowerCase() === "dimple"
+    ) {
       break;
     }
     alert("ONLY Mohith or Dimple allowed!");
@@ -16,22 +21,22 @@ if (!username) {
   localStorage.setItem("miniwhatsapp-username", username);
 }
 
-// Normalize to match server
+// NOW normalize to match server ("mohith" / "dimple")
 username = username.toLowerCase();
-console.log("FINAL username:", username);
+console.log("FINAL username:", username); // DEBUG
 
-// Storage key
+// Storage key for this device
 const STORAGE_KEY = "miniwhatsapp-messages";
 
-// DOM elements
+// DOM references
 const chatBody = document.querySelector(".chat-body");
 const input = document.querySelector(".chat-input");
 const sendBtn = document.querySelector(".send-btn");
 
-// Messages array
+// In-memory message list
 let messages = [];
 
-// Load saved messages
+// Load messages from localStorage on startup
 function loadMessages() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -45,7 +50,7 @@ function loadMessages() {
   }
 }
 
-// Save messages
+// Save messages to localStorage
 function saveMessages() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
@@ -61,10 +66,11 @@ function formatTime(ts) {
   });
 }
 
-// Add message to chat
+// Append a message bubble
+// msg: { from, text, ts }
 function appendMessage({ from, text, ts }, pushToArray = true) {
-  console.log("appendMessage:", { from, username, isMe: from === username });
   const isMe = from === username;
+  console.log("appendMessage DEBUG => from:", from, "username:", username, "isMe:", isMe); // DEBUG
 
   const wrapper = document.createElement("div");
   wrapper.className = "msg " + (isMe ? "msg-right" : "msg-left");
@@ -72,7 +78,11 @@ function appendMessage({ from, text, ts }, pushToArray = true) {
   const bubble = document.createElement("div");
   bubble.className = "msg-bubble";
 
+  // include debug info inside the bubble so you can see it on phone
   bubble.innerHTML = `
+    <div style="font-size:10px;color:#888;">
+      from: ${from} | username: ${username} | ${isMe ? "ME" : "OTHER"}
+    </div>
     ${text}
     <span class="msg-time">${formatTime(ts)}</span>
   `;
@@ -87,26 +97,29 @@ function appendMessage({ from, text, ts }, pushToArray = true) {
   }
 }
 
-// Join room
+// Join the private room
 socket.emit("join", username, (res) => {
   if (!res.ok) {
     alert("Access denied: " + res.error);
+    // clear invalid username and force re-prompt
     localStorage.removeItem("miniwhatsapp-username");
     location.reload();
   }
-  console.log("Joined as:", username);
+  console.log("Joined as:", username); // DEBUG
 });
 
-// Send message
+// Send message to server
 function sendMessage() {
   const text = input.value.trim();
   if (!text) return;
+
   socket.emit("chat-message", text);
   input.value = "";
 }
 
-// Event listeners
+// UI events
 sendBtn.addEventListener("click", sendMessage);
+
 input.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
     e.preventDefault();
@@ -114,16 +127,20 @@ input.addEventListener("keydown", (e) => {
   }
 });
 
-// Receive messages
+// Receive messages from server
 socket.on("chat-message", (msg) => {
-  console.log("Received msg:", msg);
+  console.log("Received msg:", msg); // DEBUG: See from value
   appendMessage(msg, true);
 });
 
-// Load history & register SW
+// Initial load of history
 loadMessages();
+
+// Register service worker for PWA install / offline shell
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js").catch(console.error);
+    navigator.serviceWorker
+      .register("/sw.js")
+      .catch((err) => console.error("SW registration failed", err));
   });
 }
