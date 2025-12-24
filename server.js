@@ -6,11 +6,13 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*", // later: replace "*" with your Netlify URL
-  },
+    origin: "*", // later: restrict to your Netlify URL
+    methods: ["GET", "POST"]
+  }
 });
 
-const ALLOWED_USERS = ["Mohith", "Dimple"];
+// store allowed users in lowercase for easier comparison
+const ALLOWED_USERS = ["mohith", "dimple"];
 const ROOM_ID = "private-room";
 
 app.get("/", (req, res) => {
@@ -21,22 +23,28 @@ io.on("connection", (socket) => {
   console.log("connected", socket.id);
 
   socket.on("join", (username, cb) => {
-    if (!ALLOWED_USERS.includes(username)) {
+    const clean = (username || "").trim().toLowerCase();
+    console.log("join request:", clean);
+
+    if (!ALLOWED_USERS.includes(clean)) {
       cb && cb({ ok: false, error: "Not allowed" });
       return;
     }
-    socket.data.username = username;
+
+    socket.data.username = clean; // store lowercase username
     socket.join(ROOM_ID);
     cb && cb({ ok: true });
   });
 
   socket.on("chat-message", (text) => {
     if (!socket.data.username) return;
+
     const payload = {
-      from: socket.data.username,
+      from: socket.data.username, // "mohith" or "dimple"
       text,
-      ts: Date.now(),
+      ts: Date.now()
     };
+
     io.to(ROOM_ID).emit("chat-message", payload);
   });
 
@@ -48,23 +56,4 @@ io.on("connection", (socket) => {
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log("Server running on port " + PORT);
-});
-socket.on("chat-message", (text) => {
-  if (!socket.data.username) return;
-  const id = Date.now() + "-" + Math.random().toString(36).slice(2);
-  const payload = {
-    id,
-    from: socket.data.username,
-    text,
-    ts: Date.now()
-  };
-  io.to(ROOM_ID).emit("chat-message", payload);
-
-  // Immediately mark as delivered to sender (both clients can handle)
-  io.to(ROOM_ID).emit("message-delivered", { id });
-});
-
-socket.on("message-read", (id) => {
-  // the other side marks a message as read
-  socket.to(ROOM_ID).emit("message-read", { id });
 });
