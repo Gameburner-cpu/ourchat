@@ -178,3 +178,6 @@ body {
     font-size: 0.8rem;
   }
 }
+.ticks-sent  { color: #8696a0; }
+.ticks-delivered { color: #8696a0; }
+.ticks-read { color: #53bdeb; } /* blue */

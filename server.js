@@ -49,3 +49,22 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log("Server running on port " + PORT);
 });
+socket.on("chat-message", (text) => {
+  if (!socket.data.username) return;
+  const id = Date.now() + "-" + Math.random().toString(36).slice(2);
+  const payload = {
+    id,
+    from: socket.data.username,
+    text,
+    ts: Date.now()
+  };
+  io.to(ROOM_ID).emit("chat-message", payload);
+
+  // Immediately mark as delivered to sender (both clients can handle)
+  io.to(ROOM_ID).emit("message-delivered", { id });
+});
+
+socket.on("message-read", (id) => {
+  // the other side marks a message as read
+  socket.to(ROOM_ID).emit("message-read", { id });
+});
