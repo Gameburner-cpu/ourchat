@@ -118,3 +118,11 @@ if ("serviceWorker" in navigator) {
       .catch((err) => console.error("SW registration failed", err));
   });
 }
+socket.emit("join", username, (res) => {
+  if (!res.ok) {
+    alert("Access denied: " + res.error);
+    // clear invalid username and reload so prompt appears again
+    localStorage.removeItem("miniwhatsapp-username");
+    location.reload();
+  }
+})
